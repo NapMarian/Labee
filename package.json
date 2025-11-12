@@ -1,0 +1,24 @@
+{
+  "name": "labee",
+  "version": "1.0.0",
+  "description": "Labee - Plataforma de matching laboral entre candidatos y reclutadores",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd apps/backend && npm run dev",
+    "dev:frontend": "cd apps/frontend && npm run dev",
+    "build": "cd apps/backend && npm run build && cd ../frontend && npm run build",
+    "install:all": "cd apps/backend && npm install && cd ../frontend && npm install"
+  },
+  "keywords": [
+    "job",
+    "matching",
+    "recruitment",
+    "tinder"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
