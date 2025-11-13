@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { useNavigate, Routes, Route } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import DashboardHome from './DashboardHome';
 import Swipes from './Swipes';
 import Matches from './Matches';
 import Messages from './Messages';
@@ -28,8 +27,7 @@ export default function Dashboard() {
   return (
     <DashboardLayout>
       <Routes>
-        <Route index element={<DashboardHome />} />
-        <Route path="swipes" element={<Swipes />} />
+        <Route index element={<Swipes />} />
         <Route path="matches" element={<Matches />} />
         <Route path="messages" element={<Messages />} />
         <Route path="profile" element={<div className="text-center py-12 text-gray-600 dark:text-gray-400">Profile - Coming Soon</div>} />
