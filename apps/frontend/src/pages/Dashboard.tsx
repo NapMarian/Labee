@@ -5,6 +5,7 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import Swipes from './Swipes';
 import Matches from './Matches';
 import Messages from './Messages';
+import Profile from './Profile';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -30,7 +31,7 @@ export default function Dashboard() {
         <Route index element={<Swipes />} />
         <Route path="matches" element={<Matches />} />
         <Route path="messages" element={<Messages />} />
-        <Route path="profile" element={<div className="text-center py-12 text-gray-600 dark:text-gray-400">Profile - Coming Soon</div>} />
+        <Route path="profile" element={<Profile />} />
       </Routes>
     </DashboardLayout>
   );

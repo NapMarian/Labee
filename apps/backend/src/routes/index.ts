@@ -2,6 +2,7 @@ import { Router } from 'express';
 import authRoutes from './auth.routes';
 import swipeRoutes from './swipe.routes';
 import messageRoutes from './message.routes';
+import profileRoutes from './profile.routes';
 
 const router = Router();
 
@@ -16,6 +17,9 @@ router.get('/health', (req, res) => {
 
 // Auth routes
 router.use('/auth', authRoutes);
+
+// Profile routes
+router.use('/profile', profileRoutes);
 
 // Swipe routes
 router.use('/swipes', swipeRoutes);
