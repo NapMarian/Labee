@@ -34,9 +34,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const navigation = [
     {
-      name: 'Explorar',
+      name: 'Home',
       href: '/dashboard',
       icon: Home,
+      description: 'Inicio',
+    },
+    {
+      name: 'Explorar',
+      href: '/dashboard/swipes',
+      icon: Zap,
       description: isCandidate ? 'Buscar ofertas' : 'Buscar candidatos',
     },
     {
@@ -76,14 +82,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       <aside className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-72 lg:flex-col z-50">
         <div className="flex flex-col flex-grow backdrop-blur-xl bg-white/70 dark:bg-gray-900/50 border-r border-white/20 dark:border-white/10 shadow-2xl">
           {/* Logo */}
-          <div className="flex items-center gap-3 px-6 py-6 border-b border-white/20 dark:border-white/10">
-            <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-gray-700 to-gray-800 dark:from-gray-600 dark:to-gray-700 rounded-xl">
-              <Zap className="w-6 h-6 text-white" />
+          <Link to="/" className="flex items-center gap-3 px-6 py-6 border-b border-white/20 dark:border-white/10 hover:bg-gray-100/50 dark:hover:bg-gray-800/50 transition-colors">
+            <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl">
+              <Briefcase className="w-6 h-6 text-white" />
             </div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 dark:from-gray-200 dark:to-gray-400 bg-clip-text text-transparent">
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-400 dark:to-blue-500 bg-clip-text text-transparent">
               Labee
             </h1>
-          </div>
+          </Link>
 
           {/* User Info */}
           <div className="px-6 py-4 border-b border-white/20 dark:border-white/10">
@@ -163,12 +169,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             )}
           </button>
 
-          <div className="flex items-center gap-2">
-            <Zap className="w-6 h-6 text-gray-700 dark:text-gray-300" />
-            <h1 className="text-xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 dark:from-gray-200 dark:to-gray-400 bg-clip-text text-transparent">
+          <Link to="/" className="flex items-center gap-2">
+            <Briefcase className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-400 dark:to-blue-500 bg-clip-text text-transparent">
               Labee
             </h1>
-          </div>
+          </Link>
 
           <ThemeToggle />
         </div>

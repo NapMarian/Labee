@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { MessageService } from '../services/message.service';
+import { getIO } from '../config/socket';
 
 export const getConversations = async (
   req: Request,
@@ -59,6 +60,19 @@ export const sendMessage = async (
 
     const message = await MessageService.sendMessage(matchId, userId, content);
 
+    // Emit real-time message event to match room
+    try {
+      const io = getIO();
+      io.to(`match:${matchId}`).emit('new_message', {
+        message,
+        matchId,
+      });
+      console.log(`📤 Emitted new_message to match:${matchId}`);
+    } catch (socketError) {
+      console.error('Error emitting socket event:', socketError);
+      // Continue anyway - message was saved to DB
+    }
+
     res.status(201).json({
       success: true,
       data: message,
@@ -79,6 +93,19 @@ export const markAsRead = async (
     const { matchId } = req.params;
 
     const result = await MessageService.markMessagesAsRead(matchId, userId);
+
+    // Emit read status update to match room
+    try {
+      const io = getIO();
+      io.to(`match:${matchId}`).emit('messages_read', {
+        matchId,
+        userId,
+        count: result.count,
+      });
+      console.log(`✅ Emitted messages_read to match:${matchId}`);
+    } catch (socketError) {
+      console.error('Error emitting socket event:', socketError);
+    }
 
     res.json({
       success: true,

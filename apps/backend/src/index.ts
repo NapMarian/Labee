@@ -1,4 +1,5 @@
 import express, { Application } from 'express';
+import { createServer } from 'http';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -9,8 +10,10 @@ import { env } from './config/env';
 import prisma from './config/database';
 import routes from './routes';
 import { errorHandler, notFoundHandler } from './middlewares/error.middleware';
+import { initializeSocket, setIO } from './config/socket';
 
 const app: Application = express();
+const httpServer = createServer(app);
 
 // Middlewares de seguridad
 app.use(helmet());
@@ -106,11 +109,17 @@ const startServer = async () => {
     await prisma.$connect();
     console.log('✅ Database connected successfully');
 
-    app.listen(PORT, () => {
+    // Initialize Socket.IO
+    const io = initializeSocket(httpServer);
+    setIO(io);
+    console.log('✅ Socket.IO initialized');
+
+    httpServer.listen(PORT, () => {
       console.log(`🚀 Server is running on port ${PORT}`);
       console.log(`📍 Environment: ${env.NODE_ENV}`);
       console.log(`🔗 API: http://localhost:${PORT}/api`);
       console.log(`💚 Health: http://localhost:${PORT}/api/health`);
+      console.log(`🔌 WebSocket: ws://localhost:${PORT}`);
     });
   } catch (error) {
     console.error('❌ Failed to start server:', error);

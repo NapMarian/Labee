@@ -49,17 +49,25 @@ Traditional job boards are overwhelming and time-consuming. Candidates scroll th
 - Track views and matches per offer
 - Categorization by work type, industry, and location
 
-### 💬 **Messaging System**
-- Real-time chat between matched users
-- Conversation threading per match
-- Read/unread message tracking
+### 💬 **Real-time Messaging System**
+- Socket.IO-powered real-time chat between matched users
+- Conversation threading per match with unread counts
+- Typing indicators ("User is typing...")
+- Read/unread message tracking and synchronization
 - Message history persistence
+- Connection status monitoring
+- Automatic reconnection handling
+- Room-based message broadcasting
 
 ### 🎨 **Modern Design**
-- Glassmorphism UI with backdrop blur effects
-- Dark/Light theme with seamless transitions
-- Responsive design for all screen sizes
-- Blue/gray color scheme with translucent surfaces
+- Apple iOS-inspired glassmorphism UI with backdrop blur effects
+- Floating island navigation with super-rounded borders
+- Professional public-facing landing page
+- Dashboard home with role-specific action cards
+- Dark/Light theme with seamless transitions and enhanced contrast
+- Responsive design for all screen sizes (mobile-first)
+- Blue/purple gradient color scheme with translucent surfaces
+- Animated background elements with pulsing effects
 - Accessibility-focused components
 
 ---
@@ -69,6 +77,7 @@ Traditional job boards are overwhelming and time-consuming. Candidates scroll th
 ### Backend
 - **Runtime:** Node.js + TypeScript
 - **Framework:** Express.js
+- **Real-time:** Socket.IO for WebSocket connections
 - **Database:** PostgreSQL (Neon serverless)
 - **ORM:** Prisma
 - **Authentication:** JWT with httpOnly cookies + refresh tokens
@@ -125,15 +134,30 @@ Traditional job boards are overwhelming and time-consuming. Candidates scroll th
 - [x] Active/inactive offer toggling
 - [x] Salary ranges, requirements, and categorization
 
-### 🚧 Phase 5: Messaging (In Progress)
-- [x] Message data model
-- [x] Message API endpoints
-- [ ] Real-time messaging UI
-- [ ] WebSocket integration
-- [ ] Typing indicators
-- [ ] Message notifications
+### ✅ Phase 5: Real-time Messaging (Completed)
+- [x] Message data model and database schema
+- [x] Message API endpoints (send, read, get conversations)
+- [x] Real-time messaging UI with conversation threading
+- [x] Socket.IO WebSocket integration
+- [x] Typing indicators (user is typing...)
+- [x] Message notifications and unread counts
+- [x] Read status tracking and synchronization
+- [x] Connection status indicator
 
-### 📋 Phase 6: Advanced Features (Planned)
+### ✅ Phase 6: Landing Page & UX Polish (Completed)
+- [x] Professional landing page with hero section
+- [x] Feature showcase and value propositions
+- [x] Floating island navigation (Apple iOS style)
+- [x] Dashboard home page with action cards
+- [x] Role-specific quick actions and tips
+- [x] Responsive multi-button navigation
+- [x] Enhanced glassmorphism with super-rounded borders
+- [x] Light mode contrast improvements
+- [x] Animated background elements
+- [x] Statistics section and call-to-action
+- [x] Seamless landing-to-dashboard navigation
+
+### 📋 Phase 7: Advanced Features (Planned)
 - [ ] Advanced filtering (skills, location, salary)
 - [ ] Search functionality
 - [ ] Analytics dashboard for recruiters
@@ -143,7 +167,7 @@ Traditional job boards are overwhelming and time-consuming. Candidates scroll th
 - [ ] Application tracking system
 - [ ] Interview scheduling
 
-### 🌟 Phase 7: Scale & Polish (Future)
+### 🌟 Phase 8: Scale & Polish (Future)
 - [ ] Performance optimization
 - [ ] Caching layer (Redis)
 - [ ] Full-text search (Elasticsearch)
@@ -263,6 +287,55 @@ export const getImageUrl = (imagePath: string | null | undefined): string | null
 };
 ```
 
+### 8. **Real-time Messaging with Socket.IO**
+**Challenge**: Implementing bidirectional real-time communication without blocking the main app.
+
+**Solution**:
+- Integrated Socket.IO with Express server
+- Created `useSocket` custom hook for React components
+- Implemented room-based messaging (`match:${matchId}`)
+- Added connection status tracking and reconnection handling
+- Handled duplicate messages with ID-based deduplication
+- Emitted events from HTTP endpoints for consistency
+
+```typescript
+// Socket event handlers in useSocket hook
+const { isConnected, joinMatch, leaveMatch, sendTyping } = useSocket({
+  onNewMessage: ({ message, matchId }) => {
+    if (matchId === selectedMatchId) {
+      setMessages(prev => {
+        if (prev.some(m => m.id === message.id)) return prev;
+        return [...prev, message];
+      });
+    }
+  },
+  onUserTyping: ({ userName }) => {
+    setIsTyping(true);
+    setTypingUser(userName);
+  }
+});
+```
+
+### 9. **Landing Page with Modern Glassmorphism**
+**Challenge**: Creating a professional public-facing landing page with Apple iOS-style aesthetics.
+
+**Solution**:
+- Designed floating island navigation with `backdrop-blur-2xl` and translucent backgrounds
+- Implemented super-rounded borders (`rounded-3xl`, `rounded-[3rem]`) throughout
+- Enhanced light mode contrast with tinted backgrounds and visible borders
+- Added animated background elements with pulsing blur effects
+- Created responsive navigation showing different buttons at breakpoints
+- Built role-specific dashboard home with personalized action cards
+
+```typescript
+// Floating island navigation
+<nav className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-5xl px-4">
+  <div className="backdrop-blur-2xl bg-white/80 dark:bg-gray-900/40 border border-gray-200/80 dark:border-white/10 rounded-3xl shadow-2xl">
+    {/* Navigation content */}
+  </div>
+</nav>
+```
+
 ---
 
 ## 📁 Project Structure
@@ -272,13 +345,21 @@ labee/
 ├── apps/
 │   ├── backend/
 │   │   ├── src/
-│   │   │   ├── config/         # Database & environment config
+│   │   │   ├── config/         # Database & Socket.IO config
+│   │   │   │   ├── db.ts       # Prisma client
+│   │   │   │   └── socket.ts   # Socket.IO server setup
 │   │   │   ├── controllers/    # Request handlers
+│   │   │   │   ├── auth.controller.ts
+│   │   │   │   ├── profile.controller.ts
+│   │   │   │   ├── swipe.controller.ts
+│   │   │   │   ├── jobOffer.controller.ts
+│   │   │   │   ├── message.controller.ts
+│   │   │   │   └── upload.controller.ts
 │   │   │   ├── middlewares/    # Auth, error handling, upload
 │   │   │   ├── routes/         # API endpoint definitions
 │   │   │   ├── services/       # Business logic layer
 │   │   │   ├── utils/          # JWT, validation helpers
-│   │   │   └── index.ts        # Express app entry
+│   │   │   └── index.ts        # Express app + Socket.IO entry
 │   │   ├── prisma/
 │   │   │   ├── schema.prisma   # Database schema
 │   │   │   └── migrations/     # Version-controlled DB changes
@@ -288,15 +369,29 @@ labee/
 │       ├── src/
 │       │   ├── components/
 │       │   │   ├── layout/     # DashboardLayout, navigation
-│       │   │   ├── swipe/      # SwipeCard, CandidateCard
+│       │   │   ├── swipe/      # SwipeCard, CandidateCard, JobOfferCard
 │       │   │   ├── matches/    # MatchCard
-│       │   │   ├── ui/         # Reusable components
+│       │   │   ├── ui/         # Card, Button, ThemeToggle
 │       │   │   └── ImageCropModal.tsx
-│       │   ├── pages/          # Swipes, Matches, Profile, JobOffers
+│       │   ├── pages/          # Landing, Home, Swipes, Matches, Messages, Profile, JobOffers
+│       │   │   ├── Landing.tsx # Public landing page
+│       │   │   ├── Home.tsx    # Dashboard home with action cards
+│       │   │   ├── Messages.tsx # Real-time chat
+│       │   │   └── ...
 │       │   ├── services/       # API client services
+│       │   │   ├── auth.service.ts
+│       │   │   ├── swipe.service.ts
+│       │   │   ├── message.service.ts
+│       │   │   └── ...
 │       │   ├── store/          # Zustand state management
-│       │   ├── hooks/          # useSwipeQueue, custom hooks
+│       │   │   ├── authStore.ts
+│       │   │   └── themeStore.ts
+│       │   ├── hooks/          # useSwipeQueue, useSocket, custom hooks
+│       │   │   ├── useSwipeQueue.ts
+│       │   │   └── useSocket.ts  # Socket.IO connection hook
 │       │   ├── lib/            # API client, utilities
+│       │   │   ├── api.ts      # Axios instance with interceptors
+│       │   │   └── ...
 │       │   └── types/          # TypeScript definitions
 │       └── public/             # Static assets
 │
@@ -379,9 +474,19 @@ model User {
 - `PATCH /api/job-offers/:id/toggle-status` - Toggle active/inactive
 
 ### Messages
-- `GET /api/messages/:matchId` - Get conversation
+- `GET /api/messages/conversations` - Get all conversations with unread counts
+- `GET /api/messages/:matchId` - Get conversation messages
 - `POST /api/messages/:matchId` - Send message
-- `PUT /api/messages/:matchId/read` - Mark as read
+- `PUT /api/messages/:matchId/read` - Mark messages as read
+
+### Socket.IO Events
+- `connection` - Client connects to server
+- `join_match` - Join a match room for real-time updates
+- `leave_match` - Leave a match room
+- `typing` - User is typing (emitted to match room)
+- `stop_typing` - User stopped typing
+- `new_message` - New message received (broadcasted to match room)
+- `messages_read` - Messages marked as read (broadcasted to match room)
 
 ---
 

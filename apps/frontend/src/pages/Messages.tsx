@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { MessageService, Conversation, Message } from '@/services/message.service';
+import { useSocket } from '@/hooks/useSocket';
 import Card from '@/components/ui/Card';
 import { Send, ArrowLeft, MessageCircle, Loader2, Clock } from 'lucide-react';
 
@@ -15,7 +16,47 @@ export default function Messages() {
   const [messageInput, setMessageInput] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const [typingUser, setTypingUser] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Socket.IO connection with event handlers
+  const { isConnected, joinMatch, leaveMatch, sendTyping, sendStopTyping } = useSocket({
+    onNewMessage: ({ message, matchId }) => {
+      console.log('📨 New message received:', message);
+
+      // If message is for current conversation, add it to messages
+      if (matchId === selectedMatchId) {
+        setMessages((prev) => {
+          // Avoid duplicates
+          if (prev.some(m => m.id === message.id)) return prev;
+          return [...prev, message];
+        });
+
+        // Mark as read if we're viewing this conversation
+        MessageService.markAsRead(matchId).catch(console.error);
+      }
+
+      // Refresh conversations to update unread counts
+      loadConversations();
+    },
+    onMessagesRead: ({ matchId, userId }) => {
+      console.log('✅ Messages marked as read in match:', matchId);
+      // Refresh conversations to update unread counts
+      loadConversations();
+    },
+    onUserTyping: ({ userId, userName }) => {
+      console.log('✍️ User typing:', userName);
+      setIsTyping(true);
+      setTypingUser(userName);
+    },
+    onUserStopTyping: ({ userId }) => {
+      console.log('🛑 User stopped typing');
+      setIsTyping(false);
+      setTypingUser(null);
+    },
+  });
 
   // Cargar conversaciones
   useEffect(() => {
@@ -28,17 +69,18 @@ export default function Messages() {
     if (selectedMatchId) {
       loadMessages(selectedMatchId);
 
+      // Join match room for real-time updates
+      joinMatch(selectedMatchId);
+
       // Marcar como leídos
       MessageService.markAsRead(selectedMatchId).catch(console.error);
 
-      // Polling cada 3 segundos para nuevos mensajes
-      const interval = setInterval(() => {
-        loadMessages(selectedMatchId);
-      }, 3000);
-
-      return () => clearInterval(interval);
+      // Cleanup: leave match room when conversation changes
+      return () => {
+        leaveMatch(selectedMatchId);
+      };
     }
-  }, [selectedMatchId]);
+  }, [selectedMatchId, joinMatch, leaveMatch]);
 
   // Auto-scroll al último mensaje
   useEffect(() => {
@@ -78,11 +120,25 @@ export default function Messages() {
 
     try {
       setSending(true);
+
+      // Stop typing indicator
+      const selectedConversation = conversations?.find(c => c.id === selectedMatchId);
+      if (selectedConversation) {
+        const otherUser = getOtherUser(selectedConversation);
+        sendStopTyping(selectedMatchId);
+      }
+
       const newMessage = await MessageService.sendMessage(
         selectedMatchId,
         messageInput
       );
-      setMessages([...messages, newMessage]);
+
+      // Optimistically add message to UI (Socket.IO will also send it, but we handle duplicates)
+      setMessages(prev => {
+        if (prev.some(m => m.id === newMessage.id)) return prev;
+        return [...prev, newMessage];
+      });
+
       setMessageInput('');
 
       // Actualizar conversaciones para reflejar el nuevo mensaje
@@ -91,6 +147,29 @@ export default function Messages() {
       console.error('Error sending message:', error);
     } finally {
       setSending(false);
+    }
+  };
+
+  const handleTyping = (value: string) => {
+    setMessageInput(value);
+
+    if (!selectedMatchId) return;
+
+    // Send typing indicator
+    if (value.trim() && user?.profile?.name) {
+      sendTyping(selectedMatchId, user.profile.name);
+
+      // Clear previous timeout
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+
+      // Set timeout to stop typing after 2 seconds of inactivity
+      typingTimeoutRef.current = setTimeout(() => {
+        sendStopTyping(selectedMatchId);
+      }, 2000);
+    } else {
+      sendStopTyping(selectedMatchId);
     }
   };
 
@@ -214,16 +293,31 @@ export default function Messages() {
                 );
               })
             )}
+            {isTyping && typingUser && (
+              <div className="flex justify-start">
+                <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-2xl px-4 py-2">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 italic">
+                    {typingUser} está escribiendo...
+                  </p>
+                </div>
+              </div>
+            )}
             <div ref={messagesEndRef} />
           </div>
 
           {/* Input de mensaje */}
           <form onSubmit={handleSendMessage} className="p-4 border-t border-white/20 dark:border-white/10">
+            <div className="flex items-center gap-2 mb-2">
+              <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                {isConnected ? 'Conectado' : 'Desconectado'}
+              </span>
+            </div>
             <div className="flex gap-2">
               <input
                 type="text"
                 value={messageInput}
-                onChange={(e) => setMessageInput(e.target.value)}
+                onChange={(e) => handleTyping(e.target.value)}
                 placeholder="Escribe un mensaje..."
                 className="flex-1 px-4 py-3 rounded-xl bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl border border-white/20 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 disabled={sending}
