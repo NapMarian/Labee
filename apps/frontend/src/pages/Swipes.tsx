@@ -73,6 +73,23 @@ export default function Swipes() {
   const handlePass = () => handleSwipe('PASS');
   const handleLike = () => handleSwipe('LIKE');
 
+  // Handlers para los botones que disparan la animación
+  const handlePassButton = () => {
+    if ((window as any).__swipeCard) {
+      (window as any).__swipeCard.swipeLeft();
+    } else {
+      handleSwipe('PASS');
+    }
+  };
+
+  const handleLikeButton = () => {
+    if ((window as any).__swipeCard) {
+      (window as any).__swipeCard.swipeRight();
+    } else {
+      handleSwipe('LIKE');
+    }
+  };
+
   // Obtener el item actual
   const currentItem = items[currentIndex];
   const hasMore = currentIndex < items.length;
@@ -166,7 +183,7 @@ export default function Swipes() {
       {/* Action Buttons */}
       <div className="flex items-center justify-center gap-6">
         <button
-          onClick={handlePass}
+          onClick={handlePassButton}
           disabled={!hasMore}
           className="group relative flex items-center justify-center w-16 h-16 rounded-full bg-white/70 dark:bg-gray-900/50 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-lg hover:scale-110 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
@@ -174,7 +191,7 @@ export default function Swipes() {
         </button>
 
         <button
-          onClick={handleLike}
+          onClick={handleLikeButton}
           disabled={!hasMore}
           className="group relative flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 shadow-2xl hover:scale-110 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >

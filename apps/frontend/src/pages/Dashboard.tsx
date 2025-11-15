@@ -6,6 +6,7 @@ import Swipes from './Swipes';
 import Matches from './Matches';
 import Messages from './Messages';
 import Profile from './Profile';
+import JobOffers from './JobOffers';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -31,6 +32,7 @@ export default function Dashboard() {
         <Route index element={<Swipes />} />
         <Route path="matches" element={<Matches />} />
         <Route path="messages" element={<Messages />} />
+        <Route path="job-offers" element={<JobOffers />} />
         <Route path="profile" element={<Profile />} />
       </Routes>
     </DashboardLayout>

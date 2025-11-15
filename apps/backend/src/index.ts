@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
+import path from 'path';
 import { env } from './config/env';
 import prisma from './config/database';
 import routes from './routes';
@@ -69,6 +70,13 @@ if (env.NODE_ENV === 'development') {
 } else {
   app.use(morgan('combined'));
 }
+
+// Servir archivos estáticos desde /uploads con CORS
+app.use('/uploads', (req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Cross-Origin-Resource-Policy', 'cross-origin');
+  next();
+}, express.static(path.join(__dirname, '../uploads')));
 
 // Routes
 app.use('/api', routes);

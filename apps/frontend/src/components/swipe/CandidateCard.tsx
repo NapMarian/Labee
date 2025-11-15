@@ -1,5 +1,6 @@
 import { User } from '@/types';
 import { MapPin, Briefcase, GraduationCap, Mail, Phone, FileText, User as UserIcon } from 'lucide-react';
+import { getImageUrl } from '@/lib/api';
 
 interface CandidateCardProps {
   candidate: User;
@@ -7,16 +8,17 @@ interface CandidateCardProps {
 
 export const CandidateCard = ({ candidate }: CandidateCardProps) => {
   const profile = candidate.profile;
+  const avatarUrl = getImageUrl(profile?.avatar);
 
   return (
     <div className="w-full h-full backdrop-blur-xl bg-white/70 dark:bg-gray-900/50 border border-white/20 dark:border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col">
       {/* Header con avatar y nombre */}
       <div className="bg-gradient-to-br from-gray-700 to-gray-800 dark:from-gray-600 dark:to-gray-700 p-6 text-white">
         <div className="flex items-center gap-4">
-          {profile?.avatar ? (
+          {avatarUrl ? (
             <img
-              src={profile.avatar}
-              alt={profile.name || 'Candidate'}
+              src={avatarUrl}
+              alt={profile?.name || 'Candidate'}
               className="w-20 h-20 rounded-2xl bg-white/10 backdrop-blur object-cover border-2 border-white/20"
             />
           ) : (

@@ -158,29 +158,60 @@ export class SwipeService {
     }
 
     // Crear el match
-    const match = await prisma.match.create({
-      data: {
-        user1Id: candidateId,
-        user2Id: recruiterId,
-        jobOfferId,
-        active: true,
-      },
-      include: {
-        user1: {
-          include: {
-            profile: true,
-          },
+    try {
+      const match = await prisma.match.create({
+        data: {
+          user1Id: candidateId,
+          user2Id: recruiterId,
+          jobOfferId,
+          active: true,
         },
-        user2: {
-          include: {
-            profile: true,
+        include: {
+          user1: {
+            include: {
+              profile: true,
+            },
           },
+          user2: {
+            include: {
+              profile: true,
+            },
+          },
+          jobOffer: true,
         },
-        jobOffer: true,
-      },
-    });
+      });
+      return match;
+    } catch (error: any) {
+      // Si el error es por duplicado (P2002), buscar y retornar el match existente
+      if (error.code === 'P2002') {
+        const match = await prisma.match.findFirst({
+          where: {
+            OR: [
+              { user1Id: candidateId, user2Id: recruiterId, jobOfferId },
+              { user1Id: recruiterId, user2Id: candidateId, jobOfferId },
+            ],
+          },
+          include: {
+            user1: {
+              include: {
+                profile: true,
+              },
+            },
+            user2: {
+              include: {
+                profile: true,
+              },
+            },
+            jobOffer: true,
+          },
+        });
 
-    return match;
+        if (match) {
+          return match;
+        }
+      }
+      throw error;
+    }
   }
 
   /**

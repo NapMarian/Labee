@@ -1,5 +1,6 @@
 import { Match } from '@/types';
 import { useAuthStore } from '@/store/authStore';
+import { getImageUrl } from '@/lib/api';
 import { Building2, MapPin, Briefcase, MessageSquare, Trash2, User as UserIcon } from 'lucide-react';
 import { useState } from 'react';
 import Card from '../ui/Card';
@@ -18,6 +19,7 @@ export const MatchCard = ({ match, onUnmatch, onMessage }: MatchCardProps) => {
   const otherUser = match.user1Id === user?.id ? match.user2 : match.user1;
   const profile = otherUser?.profile;
   const isCandidate = user?.userType === 'CANDIDATE';
+  const avatarUrl = getImageUrl(profile?.avatar);
 
   const handleUnmatch = () => {
     onUnmatch(match.id);
@@ -31,10 +33,10 @@ export const MatchCard = ({ match, onUnmatch, onMessage }: MatchCardProps) => {
         <div className="flex items-start gap-4 mb-4">
           {/* Avatar */}
           <div className="flex-shrink-0">
-            {profile?.avatar ? (
+            {avatarUrl ? (
               <img
-                src={profile.avatar}
-                alt={profile.name}
+                src={avatarUrl}
+                alt={profile?.name}
                 className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur object-cover border border-white/20"
               />
             ) : (

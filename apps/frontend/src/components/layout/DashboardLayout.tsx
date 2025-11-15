@@ -1,6 +1,7 @@
 import { ReactNode, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
+import { getImageUrl } from '@/lib/api';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import {
   Zap,
@@ -50,6 +51,17 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       icon: MessageSquare,
       description: 'Chat',
     },
+    // Solo mostrar "Mis Ofertas" para reclutadores
+    ...(!isCandidate
+      ? [
+          {
+            name: 'Mis Ofertas',
+            href: '/dashboard/job-offers',
+            icon: Briefcase,
+            description: 'Gestionar ofertas',
+          },
+        ]
+      : []),
     {
       name: 'Perfil',
       href: '/dashboard/profile',
@@ -76,10 +88,18 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           {/* User Info */}
           <div className="px-6 py-4 border-b border-white/20 dark:border-white/10">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-400 to-gray-600 dark:from-gray-500 dark:to-gray-700 flex items-center justify-center">
-                <span className="text-white font-semibold text-sm">
-                  {user?.profile?.name?.charAt(0) || user?.email?.charAt(0)}
-                </span>
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-400 to-gray-600 dark:from-gray-500 dark:to-gray-700 flex items-center justify-center overflow-hidden">
+                {getImageUrl(isCandidate ? user?.profile?.avatar : user?.profile?.companyLogo) ? (
+                  <img
+                    src={getImageUrl(isCandidate ? user?.profile?.avatar : user?.profile?.companyLogo)!}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-white font-semibold text-sm">
+                    {user?.profile?.name?.charAt(0) || user?.email?.charAt(0)}
+                  </span>
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
@@ -168,10 +188,18 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               {/* User Info */}
               <div className="px-6 py-6 border-b border-white/20 dark:border-white/10">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gray-400 to-gray-600 dark:from-gray-500 dark:to-gray-700 flex items-center justify-center">
-                    <span className="text-white font-semibold">
-                      {user?.profile?.name?.charAt(0) || user?.email?.charAt(0)}
-                    </span>
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gray-400 to-gray-600 dark:from-gray-500 dark:to-gray-700 flex items-center justify-center overflow-hidden">
+                    {getImageUrl(isCandidate ? user?.profile?.avatar : user?.profile?.companyLogo) ? (
+                      <img
+                        src={getImageUrl(isCandidate ? user?.profile?.avatar : user?.profile?.companyLogo)!}
+                        alt="Profile"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-white font-semibold">
+                        {user?.profile?.name?.charAt(0) || user?.email?.charAt(0)}
+                      </span>
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">

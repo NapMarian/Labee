@@ -1,4 +1,5 @@
 import { JobOffer } from '@/types';
+import { getImageUrl } from '@/lib/api';
 import { Briefcase, MapPin, DollarSign, Building2 } from 'lucide-react';
 
 interface JobOfferCardProps {
@@ -6,14 +7,16 @@ interface JobOfferCardProps {
 }
 
 export const JobOfferCard = ({ offer }: JobOfferCardProps) => {
+  const companyLogoUrl = getImageUrl(offer.recruiter?.profile?.companyLogo);
+
   return (
     <div className="w-full h-full backdrop-blur-xl bg-white/70 dark:bg-gray-900/50 border border-white/20 dark:border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col">
       {/* Header con logo de empresa */}
       <div className="bg-gradient-to-br from-gray-700 to-gray-800 dark:from-gray-600 dark:to-gray-700 p-6 text-white">
         <div className="flex items-center gap-4">
-          {offer.recruiter?.profile?.companyLogo ? (
+          {companyLogoUrl ? (
             <img
-              src={offer.recruiter.profile.companyLogo}
+              src={companyLogoUrl}
               alt={offer.recruiter?.profile?.companyName || 'Company'}
               className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur object-cover border border-white/20"
             />

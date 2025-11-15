@@ -8,9 +8,12 @@ export interface UpdateProfileData {
   phone?: string;
 
   // Candidato
+  currentPosition?: string;
   skills?: string[];
   education?: string;
   yearsExperience?: number;
+  workTypes?: string[];
+  categories?: string[];
 
   // Reclutador
   companyName?: string;

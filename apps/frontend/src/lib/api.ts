@@ -124,5 +124,20 @@ class ApiClient {
   }
 }
 
+/**
+ * Helper para construir URLs de imágenes desde el backend
+ */
+export const getImageUrl = (imagePath: string | null | undefined): string | null => {
+  if (!imagePath) return null;
+
+  // Si ya es una URL completa, devolverla tal cual
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    return imagePath;
+  }
+
+  // Construir URL completa con el backend
+  return `${API_URL}${imagePath}`;
+};
+
 export const api = new ApiClient();
 export default api;

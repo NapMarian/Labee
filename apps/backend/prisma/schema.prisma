@@ -42,6 +42,20 @@ enum JobCategory {
   OTHER
 }
 
+enum WorkModality {
+  REMOTE
+  ONSITE
+  HYBRID
+}
+
+enum CompanySize {
+  STARTUP       // 1-10
+  SMALL         // 11-50
+  MEDIUM        // 51-200
+  LARGE         // 201-1000
+  ENTERPRISE    // 1000+
+}
+
 model User {
   id            String    @id @default(uuid())
   email         String    @unique
@@ -89,6 +103,8 @@ model Profile {
   phone           String?
 
   // Información de candidato
+  headline        String?       // Título profesional corto
+  currentPosition String?       // Posición/trabajo actual
   skills          String[]      @default([])
   experience      Json?         // [{company, position, years, description}]
   education       String?
@@ -97,11 +113,32 @@ model Profile {
   categories      JobCategory[] @default([])
   yearsExperience Int?
 
+  // Preferencias de trabajo del candidato
+  workModality    WorkModality? // Preferencia: Remoto, Presencial, Híbrido
+  availableFrom   DateTime?     // Disponibilidad para empezar
+  expectedSalaryMin Int?        // Salario esperado mínimo
+  expectedSalaryMax Int?        // Salario esperado máximo
+  salaryCurrency  String        @default("USD")
+
+  // Información adicional del candidato
+  languages       Json?         // [{language: string, level: string}]
+  certifications  String[]      @default([])
+  portfolio       String?       // URL del portafolio
+  linkedin        String?       // URL de LinkedIn personal
+  github          String?       // URL de GitHub
+
   // Información de reclutador
   companyName     String?
   companyLogo     String?
   companyWebsite  String?
   position        String?       // Cargo del reclutador
+
+  // Información adicional de la empresa (reclutador)
+  companyDescription String?    @db.Text // Descripción detallada de la empresa
+  companySize     CompanySize?  // Tamaño de la empresa
+  industry        String?       // Industria/sector
+  foundedYear     Int?          // Año de fundación
+  companyLinkedin String?       // LinkedIn de la empresa
 
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
